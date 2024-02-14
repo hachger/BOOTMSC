@@ -72,7 +72,7 @@ typedef union{
   */
 
 #define STORAGE_LUN_NBR                  1
-#define STORAGE_BLK_NBR                  96
+#define STORAGE_BLK_NBR                  0x10000
 #define STORAGE_BLK_SIZ                  0x200
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
@@ -154,9 +154,9 @@ const char msgOk[]    = "Firmware UPDATE OK              ";
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
-static const uint16_t BUFMASKTX = 2047;
-extern uint8_t txBuf[2048];
-extern uint16_t iw;
+//static const uint16_t BUFMASKTX = 2047;
+//extern uint8_t txBuf[2048];
+//extern uint16_t iw;
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
@@ -319,12 +319,12 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 					binFileStart = programAddressStart;
 				}
 
-				sprintf(strAux, "WBIN: %4u -- %4u -- %6u\r\n", (unsigned int)blk_addr, (unsigned int)blk_len, (unsigned int)binFileSize);
-
-				for(int i=0; i<30; i++){
-					txBuf[iw++] = strAux[i];
-					iw &= BUFMASKTX;
-				}
+//				sprintf(strAux, "WBIN: %4u -- %4u -- %6u\r\n", (unsigned int)blk_addr, (unsigned int)blk_len, (unsigned int)binFileSize);
+//
+//				for(int i=0; i<30; i++){
+//					txBuf[iw++] = strAux[i];
+//					iw &= BUFMASKTX;
+//				}
 			}
 		}
 	}
@@ -351,19 +351,19 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 			if(statePage == 0){
 				if(FlashPage(binFileStart) == 0){
 					memcpy(&MSCbuffer[MESSAGGE_START], msgERROR, sizeof(msgERROR));
-					sprintf(strAux, "PAGE ERROR: %8X\r\n", (unsigned int)binFileStart);
-					for(int i=0; i<22; i++){
-						txBuf[iw++] = strAux[i];
-						iw &= BUFMASKTX;
-					}
+//					sprintf(strAux, "PAGE ERROR: %8X\r\n", (unsigned int)binFileStart);
+//					for(int i=0; i<22; i++){
+//						txBuf[iw++] = strAux[i];
+//						iw &= BUFMASKTX;
+//					}
 					aBinFile = 0;
 				}
 
-				sprintf(strAux, "PAGE: %8X %8X\r\n", (unsigned int)binFileStart, *((unsigned int *)&bufPage[0]));
-				for(int i=0; i<25; i++){
-					txBuf[iw++] = strAux[i];
-					iw &= BUFMASKTX;
-				}
+//				sprintf(strAux, "PAGE: %8X %8X\r\n", (unsigned int)binFileStart, *((unsigned int *)&bufPage[0]));
+//				for(int i=0; i<25; i++){
+//					txBuf[iw++] = strAux[i];
+//					iw &= BUFMASKTX;
+//				}
 				binFileStart += 1024;
 			}
 
@@ -378,11 +378,11 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 //			}
 			if(binFileSize == 0){
 				aBinFile = 0;
-				sprintf(strAux, "PAGE    OK: %8X\r\n", (unsigned int)binFileStart);
-				for(int i=0; i<22; i++){
-					txBuf[iw++] = strAux[i];
-					iw &= BUFMASKTX;
-				}
+//				sprintf(strAux, "PAGE    OK: %8X\r\n", (unsigned int)binFileStart);
+//				for(int i=0; i<22; i++){
+//					txBuf[iw++] = strAux[i];
+//					iw &= BUFMASKTX;
+//				}
 				memcpy(&MSCbuffer[MESSAGGE_START], msgOk, sizeof(msgOk));
 
 //				sprintf(strAux, "WEND: %4u -- %4u -- %6u\r\n", (unsigned int)blk_addr, (unsigned int)blk_len, (unsigned int)binFileSize);

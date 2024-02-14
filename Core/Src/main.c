@@ -32,7 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PROG_ADDRESS_START	0x08005000
+#define PROG_ADDRESS_START	0x08004400
 
 typedef  void (*pFunction)(void);
 pFunction JumpToApplication;
@@ -46,15 +46,14 @@ uint32_t JumpAddress;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-const uint16_t BUFSIZETX = 2048;
-const uint16_t BUFMASKTX = 2047;
-
-uint8_t txBuf[2048];
-uint16_t iw;
-uint16_t ir;
+//const uint16_t BUFSIZETX = 2048;
+//const uint16_t BUFMASKTX = 2047;
+//
+//uint8_t txBuf[2048];
+//uint16_t iw;
+//uint16_t ir;
 
 extern uint32_t programAddressStart;
 
@@ -63,7 +62,6 @@ extern uint32_t programAddressStart;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -84,8 +82,8 @@ int main(void)
 	uint32_t sequenceLed = 0xF5550000;
 	uint32_t maskLed = 0x80000000;
 
-	iw = 0;
-	ir = 0;
+//	iw = 0;
+//	ir = 0;
 
   /* USER CODE END 1 */
 
@@ -130,6 +128,7 @@ int main(void)
 
 
   if(timeLed == 0){
+
     /* Jump To Normal boot */
 //    typedef  void (*pFunction)(void);
 //
@@ -140,12 +139,15 @@ int main(void)
    // __disable_irq();
 
     /* Jump to system memory */
-    JumpAddress = *(__IO uint32_t*) (PROG_ADDRESS_START + 4);
-    JumpToApplication = (pFunction) JumpAddress;
-    /* Initialize user application's Stack Pointer */
-    __set_MSP(*(__IO uint32_t*) PROG_ADDRESS_START);
+	  __HAL_RCC_GPIOC_CLK_DISABLE();
+	  __disable_irq();
 
-    JumpToApplication();
+	  JumpAddress = *(__IO uint32_t*) (PROG_ADDRESS_START + 4);
+	  JumpToApplication = (pFunction) JumpAddress;
+	  /* Initialize user application's Stack Pointer */
+	  __set_MSP(*(__IO uint32_t*) PROG_ADDRESS_START);
+
+	  JumpToApplication();
   }
 
 
@@ -154,7 +156,6 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USB_DEVICE_Init();
-  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   programAddressStart = PROG_ADDRESS_START;
@@ -183,12 +184,12 @@ int main(void)
 			  maskLed = 0x80000000;
 	  }
 
-	  if(iw != ir){
-		 if(__HAL_UART_GET_FLAG(&huart1, UART_FLAG_TXE)){
-			 USART1->DR = txBuf[ir++];
-			 ir &= BUFMASKTX;
-		 }
-	  }
+//	  if(iw != ir){
+//		 if(__HAL_UART_GET_FLAG(&huart1, UART_FLAG_TXE)){
+//			 USART1->DR = txBuf[ir++];
+//			 ir &= BUFMASKTX;
+//		 }
+//	  }
 
   }
   /* USER CODE END 3 */
@@ -238,39 +239,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART1_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART1_Init 0 */
-
-  /* USER CODE END USART1_Init 0 */
-
-  /* USER CODE BEGIN USART1_Init 1 */
-
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
-
-  /* USER CODE END USART1_Init 2 */
-
 }
 
 /**
