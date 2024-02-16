@@ -76,8 +76,8 @@ typedef union{
 #define STORAGE_BLK_SIZ                  0x200
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
-#define MESSAGGE_START 		(0xA00+19)
-
+#define MESSAGGE_START 			(0xA00+19)
+#define DATEFILESTATEOFFSET		(0x600+86) /*(32*2+22)*/
 
 /* USER CODE END PRIVATE_DEFINES */
 
@@ -351,6 +351,10 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 			if(statePage == 0){
 				if(FlashPage(binFileStart) == 0){
 					memcpy(&MSCbuffer[MESSAGGE_START], msgERROR, sizeof(msgERROR));
+					w.u16[0] = *((uint16_t *)&MSCbuffer[DATEFILESTATEOFFSET]);
+					w.u16[0]++;
+					memcpy(&MSCbuffer[DATEFILESTATEOFFSET], &w.u8[0], 2);
+
 //					sprintf(strAux, "PAGE ERROR: %8X\r\n", (unsigned int)binFileStart);
 //					for(int i=0; i<22; i++){
 //						txBuf[iw++] = strAux[i];
@@ -384,6 +388,9 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 //					iw &= BUFMASKTX;
 //				}
 				memcpy(&MSCbuffer[MESSAGGE_START], msgOk, sizeof(msgOk));
+				w.u16[0] = *((uint16_t *)&MSCbuffer[DATEFILESTATEOFFSET]);
+				w.u16[0]++;
+				memcpy(&MSCbuffer[DATEFILESTATEOFFSET], &w.u8[0], 2);
 
 //				sprintf(strAux, "WEND: %4u -- %4u -- %6u\r\n", (unsigned int)blk_addr, (unsigned int)blk_len, (unsigned int)binFileSize);
 //				for(int i=0; i<30; i++){

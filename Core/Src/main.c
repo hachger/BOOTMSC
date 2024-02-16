@@ -32,7 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PROG_ADDRESS_START	0x08004400
+#define PROG_ADDRESS_START	(uint32_t)0x08004400
 
 typedef  void (*pFunction)(void);
 pFunction JumpToApplication;
@@ -119,7 +119,7 @@ int main(void)
 
   timeLed = 90;
   while(timeLed){
-	  if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_SET){
+	  if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET){
 		  break;
 	  }
 	  HAL_Delay(10);
@@ -139,15 +139,27 @@ int main(void)
    // __disable_irq();
 
     /* Jump to system memory */
-	  __HAL_RCC_GPIOC_CLK_DISABLE();
-	  __disable_irq();
+//	  JumpAddress = *(__IO uint32_t*) (PROG_ADDRESS_START + 4);
+//	  JumpToApplication = (pFunction) JumpAddress;
+//	  /* Initialize user application's Stack Pointer */
+//	  __set_MSP(*(__IO uint32_t*) PROG_ADDRESS_START);
+//
+//	  JumpToApplication();
 
-	  JumpAddress = *(__IO uint32_t*) (PROG_ADDRESS_START + 4);
-	  JumpToApplication = (pFunction) JumpAddress;
-	  /* Initialize user application's Stack Pointer */
-	  __set_MSP(*(__IO uint32_t*) PROG_ADDRESS_START);
+		void (*app_reset_handler)(void) = (void*)(*((volatile uint32_t*) (0x08004400 + 4U)));
+//		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
-	  JumpToApplication();
+		/* Reset the Clock */
+		HAL_RCC_DeInit();
+		HAL_DeInit();
+
+		__set_MSP(*(volatile uint32_t*) 0x08004400);
+
+		SysTick->CTRL = 0;
+		SysTick->LOAD = 0;
+		SysTick->VAL = 0;
+		/* Jump to application */
+		app_reset_handler();    //call the app reset handler
   }
 
 
